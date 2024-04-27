@@ -31,17 +31,17 @@ static RL: Field = Field {width: 3, lsb: 25};
 static VL: Field = Field {width: 25, lsb: 0}; 
 static OP: Field = Field {width: 4, lsb: 28};
 
-fn mask(bits: u32) -> u32 { (1 << bits) - 1 }
+unsafe fn mask(bits: u32) -> u32 { (1 << bits) - 1 }
 
-pub fn get(field: &Field, instruction: Umi) -> u32 {
+pub unsafe fn get(field: &Field, instruction: Umi) -> u32 {
     (instruction >> field.lsb) & mask(field.width)
 }
 
-fn op(instruction: Umi) -> Option<Opcode> { 
+unsafe fn op(instruction: Umi) -> Option<Opcode> { 
     FromPrimitive::from_u32((instruction >> OP.lsb) & mask(OP.width))
 }
 
-pub fn disassemble(inst: Umi, um: &mut UniversalMachine) {
+pub unsafe fn disassemble(inst: Umi, um: &mut UniversalMachine) {
     // um.print_state();
     um.increment_counter();
     match op(inst) {

@@ -1,6 +1,6 @@
 use std::convert::TryInto;
 
-pub fn load(input: Option<&str>) -> Vec<u32> {
+pub unsafe fn load(input: Option<&str>) -> Vec<u32> {
     let mut raw_reader: Box<dyn std::io::BufRead> = match input {
         None => Box::new(std::io::BufReader::new(std::io::stdin())),
         Some(filename) => Box::new(std::io::BufReader::new(
