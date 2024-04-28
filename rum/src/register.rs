@@ -1,5 +1,6 @@
 use super::universal_machine::UniversalMachine;
 use std::io::{stdin, stdout, Read, Write};
+use std::mem::MaybeUninit;
 
 impl UniversalMachine {
     pub unsafe fn cmov(&mut self, reg1: usize, reg2: usize, reg3: usize) {
@@ -69,7 +70,10 @@ impl UniversalMachine {
     
     pub unsafe fn unmapseg(&mut self, reg1: usize) {
         let reg1_value = *self.registers.get_unchecked(reg1);
-        self.memory_space.get_unchecked_mut(reg1_value as usize).clear();
+        let memory_ptr = self.memory_space
+            .get_unchecked_mut(reg1_value as usize)
+            .as_mut_ptr() as *mut MaybeUninit<u32>;
+        std::ptr::write_volatile(memory_ptr, MaybeUninit::uninit());
         self.free_memory.push(reg1_value);
     }
     
