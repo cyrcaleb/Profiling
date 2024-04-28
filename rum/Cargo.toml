@@ -16,3 +16,4 @@ codegen-units = 1
 incremental = false 
 overflow-checks = false
 debug = false
+release = true
