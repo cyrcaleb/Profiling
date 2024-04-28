@@ -70,10 +70,7 @@ impl UniversalMachine {
     
     pub unsafe fn unmapseg(&mut self, reg1: usize) {
         let reg1_value = *self.registers.get_unchecked(reg1);
-        let memory_ptr = self.memory_space
-            .get_unchecked_mut(reg1_value as usize)
-            .as_mut_ptr() as *mut MaybeUninit<u32>;
-        std::ptr::write_volatile(memory_ptr, MaybeUninit::uninit());
+        self.memory_space.get_unchecked_mut(reg1_value as usize).clear();
         self.free_memory.push(reg1_value);
     }
     
@@ -102,7 +99,6 @@ impl UniversalMachine {
             self.program_counter = *self.registers.get_unchecked(reg2);
         }
     }
-    
     
     pub unsafe fn loadval(&mut self, reg1: usize, value: usize) {
         *self.registers.get_unchecked_mut(reg1) = value as u32;
