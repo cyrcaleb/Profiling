@@ -33,8 +33,8 @@ static OP: Field = Field {width: 4, lsb: 28};
 
 unsafe fn mask(bits: u32) -> u32 { (1 << bits) - 1 }
 
-pub unsafe fn get(field: &Field, instruction: Umi) -> u32 {
-    (instruction >> field.lsb) & mask(field.width)
+pub unsafe fn get(field: &Field, instruction: Umi) -> usize {
+    ( (instruction >> field.lsb) & mask(field.width) ) as usize
 }
 
 unsafe fn op(instruction: Umi) -> Option<Opcode> { 
