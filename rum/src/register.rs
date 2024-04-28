@@ -1,8 +1,7 @@
-use super::universal_machine::{UniversalMachine, Segment};
+use super::universal_machine::UniversalMachine;
 use std::io::{stdin, stdout, Read, Write};
 
 impl UniversalMachine {
-    
     pub unsafe fn cmov(&mut self, reg1: u32, reg2: u32, reg3: u32) {
         let reg1_value = *self.registers.get_unchecked(reg1 as usize);
         if reg1_value != 0 {
@@ -38,7 +37,7 @@ impl UniversalMachine {
     pub unsafe fn div(&mut self, reg1: u32, reg2: u32, reg3: u32) {
         let reg2_value = *self.registers.get_unchecked(reg2 as usize);
         let reg3_value = *self.registers.get_unchecked(reg3 as usize);
-        if reg3_value == 0 { panic!("Cannot Divide By 0") }
+        // if reg3_value == 0 { panic!("Cannot Divide By 0") }
         *self.registers.get_unchecked_mut(reg1 as usize) = reg2_value.wrapping_div(reg3_value);
     }
     
@@ -53,25 +52,24 @@ impl UniversalMachine {
     }
     
     pub unsafe fn mapseg(&mut self, reg1: u32, reg2: u32) {
-        let free_memory_len = self.get_free_memory_len();
-        if free_memory_len > 0 {
+        if !self.free_memory.is_empty() {
             let num_words = *self.registers.get_unchecked(reg2 as usize);
-            let segment = Segment { data: vec![0; num_words as usize] };
-            self.set_segment_from_memory_space(self.get_from_free_memory(), segment);
-            *self.registers.get_unchecked_mut(reg1 as usize) = self.get_from_free_memory();
-            self.pop_free_memory();
+            let segment = vec![0; num_words as usize];
+            self.set_segment_from_memory_space(self.free_memory[(self.free_memory.len() - 1) as usize], segment);
+            *self.registers.get_unchecked_mut(reg1 as usize) = self.free_memory[(self.free_memory.len() - 1) as usize];
+            self.free_memory.pop().unwrap();
             return;
         }
         let num_words = *self.registers.get_unchecked(reg2 as usize);
-        let segment = Segment { data: vec![0; num_words as usize] };
-        self.push_memory_space(segment);
-        *self.registers.get_unchecked_mut(reg1 as usize) = (self.get_memory_space_len().wrapping_sub(1)) as u32;
+        let segment = vec![0; num_words as usize];
+        self.memory_space.push(segment);
+        *self.registers.get_unchecked_mut(reg1 as usize) = (self.memory_space.len().wrapping_sub(1)) as u32;
     }
     
     pub unsafe fn unmapseg(&mut self, reg1: u32) {
         let reg1_value = *self.registers.get_unchecked(reg1 as usize);
-        self.set_segment_from_memory_space(reg1_value, Segment { data: vec![0] });
-        self.push_free_memory(reg1_value);
+        self.set_segment_from_memory_space(reg1_value, vec![0]);
+        self.free_memory.push(reg1_value);
     }
     
     pub unsafe fn output(&mut self, reg1: u32) {

@@ -7,17 +7,9 @@ use crate::rumdis;
 pub struct UniversalMachine {
     pub registers: Vec<u32>,
     pub program_counter: u32,
-    pub memory_space: Vec<Segment>,
+    pub memory_space: Vec<Vec<u32>>,
     pub free_memory: Vec<u32>,
 } 
-
-/// Represents a memory segment containing data.
-///
-/// Segments are used by the UniversalMachine to store program instructions or data.
-#[derive(Clone)]
-pub struct Segment {
-    pub data: Vec<u32>,
-}
 
 impl UniversalMachine {
     /// Creates a new instance of the UniversalMachine.
@@ -31,7 +23,7 @@ impl UniversalMachine {
     /// A new instance of UniversalMachine.
     pub unsafe fn new(instructions: Vec<u32>) -> Self {
         let registers = vec![0; 8];  // Initialize registers with 8 elements, all set to 0
-        let memory_space = vec![Segment{data: instructions}];
+        let memory_space = vec![instructions];
         let program_counter = 0;
         let free_memory = Vec::new();  // Initialize free memory as empty vector
 
@@ -42,7 +34,6 @@ impl UniversalMachine {
             free_memory,
         }
     }
-
 
     /// Sets the program counter to the specified value.
     ///
@@ -76,7 +67,7 @@ impl UniversalMachine {
         self.registers[index] = value;
     }
 
-    /// Retrieves the segment from the memory space at the specified address.
+        /// Retrieves the segment from the memory space at the specified address.
     ///
     /// # Arguments
     ///
@@ -85,7 +76,7 @@ impl UniversalMachine {
     /// # Returns
     ///
     /// The segment at the specified address.
-    pub unsafe fn get_segment_from_memory_space(&self, address: u32) -> &Segment {
+    pub unsafe fn get_segment_from_memory_space(&self, address: u32) -> &Vec<u32> {
         &self.memory_space[address as usize]
     }
 
@@ -95,7 +86,7 @@ impl UniversalMachine {
     ///
     /// * `address` - The address to set the segment to.
     /// * `value` - The segment to set.
-    pub unsafe fn set_segment_from_memory_space(&mut self, address: u32, value: Segment) {
+    pub unsafe fn set_segment_from_memory_space(&mut self, address: u32, value: Vec<u32>) {
         if (address as usize) < self.memory_space.len(){
             self.memory_space[address as usize] = value;
         }
@@ -113,7 +104,7 @@ impl UniversalMachine {
     /// The value at the specified address and offset.
     pub unsafe fn get_val_from_memory_space(&self, address: u32, offset: u32) -> u32 {
         let segment = self.memory_space.get_unchecked(address as usize);
-        *segment.data.get_unchecked(offset as usize)
+        *segment.get_unchecked(offset as usize)
     }
 
     /// Sets the value in the memory space at the specified address and offset.
@@ -125,17 +116,12 @@ impl UniversalMachine {
     /// * `value` - The value to set.
     pub unsafe fn set_val_from_memory_space(&mut self, address: u32, offset: u32, value: u32) {
         let segment = self.memory_space.get_unchecked_mut(address as usize);
-        *segment.data.get_unchecked_mut(offset as usize) = value;
-    }
-    
-    /// Retrieves the length of the free memory.
-    pub unsafe fn get_free_memory_len(&self) -> usize {
-        return self.free_memory.len();
+        *segment.get_unchecked_mut(offset as usize) = value;
     }
 
-    /// Retrieves the length of the memory space.
-    pub unsafe fn get_memory_space_len(&self) -> usize {
-        return self.memory_space.len();
+    /// Retrieves the length of the free memory.
+    pub unsafe fn get_free_memory_len(&self) -> usize {
+        self.free_memory.len()
     }
 
     /// Retrieves the value from the free memory at the top of the stack.
@@ -144,47 +130,7 @@ impl UniversalMachine {
     ///
     /// The value from the top of the free memory stack.
     pub unsafe fn get_from_free_memory(&self) -> u32 {
-        return self.free_memory[(self.free_memory.len() - 1) as usize];
-    }
-
-    /// Pushes a segment onto the memory space.
-    ///
-    /// # Arguments
-    ///
-    /// * `value` - The segment to push onto the memory space.
-    pub unsafe fn push_memory_space(&mut self, value: Segment) {
-        self.memory_space.push(value);
-    }
-
-    /// Pushes an address onto the free memory stack.
-    ///
-    /// # Arguments
-    ///
-    /// * `address` - The address to push onto the free memory stack.
-    pub unsafe fn push_free_memory(&mut self, address: u32) {
-        self.free_memory.push(address);
-    }
-
-    /// Pops an address from the free memory stack.
-    ///
-    /// # Returns
-    ///
-    /// The address popped from the free memory stack.
-    pub unsafe fn pop_free_memory(&mut self) -> u32 {
-        self.free_memory.pop().unwrap()
-    }
-
-    /// Peeks at the top address from the free memory stack without removing it.
-    ///
-    /// # Returns
-    ///
-    /// An option containing the top address from the free memory stack, or None if the stack is empty.
-    pub unsafe fn peek_free_memory(&self) -> Option<u32> {
-        if self.free_memory.is_empty() {
-            return None;
-        } else {
-            return Some((self.free_memory.len()-1) as u32);
-        }
+        self.free_memory[(self.free_memory.len() - 1) as usize]
     }
 
     /// Runs the Universal Machine, continuously executing instructions until halted.
@@ -194,4 +140,4 @@ impl UniversalMachine {
             rumdis::disassemble(instruction, self);
         }
     }
-} 
+}
