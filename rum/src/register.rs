@@ -97,11 +97,12 @@ impl UniversalMachine {
         if reg1_value == 0 {
             self.program_counter = *self.registers.get_unchecked(reg2);
         } else {
-            let segment = self.memory_space.get_unchecked(reg1_value as usize).clone();
-            *self.memory_space.get_unchecked_mut(0) = segment;
+            let segment = self.memory_space.swap_remove(reg1_value as usize);
+            self.memory_space.insert(0, segment);
             self.program_counter = *self.registers.get_unchecked(reg2);
         }
     }
+    
     
     pub unsafe fn loadval(&mut self, reg1: usize, value: usize) {
         *self.registers.get_unchecked_mut(reg1) = value as u32;
