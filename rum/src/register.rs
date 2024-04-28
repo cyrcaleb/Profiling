@@ -96,7 +96,7 @@ impl UniversalMachine {
         if reg1_value == 0 {
             self.set_program_counter(*self.registers.get_unchecked(reg2 as usize));
         } else {
-            let segment = self.get_segment_from_memory_space(reg1_value);
+            let segment = self.get_segment_from_memory_space(reg1_value).clone();
             self.set_segment_from_memory_space(0, segment);
             self.set_program_counter(*self.registers.get_unchecked(reg2 as usize));
         }

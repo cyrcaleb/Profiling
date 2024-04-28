@@ -85,8 +85,8 @@ impl UniversalMachine {
     /// # Returns
     ///
     /// The segment at the specified address.
-    pub unsafe fn get_segment_from_memory_space(&self, address: u32) -> Segment {
-        return self.memory_space[address as usize].clone();
+    pub unsafe fn get_segment_from_memory_space(&self, address: u32) -> &Segment {
+        &self.memory_space[address as usize]
     }
 
     /// Sets the segment in the memory space at the specified address.
@@ -112,7 +112,8 @@ impl UniversalMachine {
     ///
     /// The value at the specified address and offset.
     pub unsafe fn get_val_from_memory_space(&self, address: u32, offset: u32) -> u32 {
-        return self.memory_space[address as usize].data[offset as usize];
+        let segment = self.memory_space.get_unchecked(address as usize);
+        *segment.data.get_unchecked(offset as usize)
     }
 
     /// Sets the value in the memory space at the specified address and offset.
@@ -123,7 +124,8 @@ impl UniversalMachine {
     /// * `offset` - The offset within the segment.
     /// * `value` - The value to set.
     pub unsafe fn set_val_from_memory_space(&mut self, address: u32, offset: u32, value: u32) {
-        self.memory_space[address as usize].data[offset as usize] = value;
+        let segment = self.memory_space.get_unchecked_mut(address as usize);
+        *segment.data.get_unchecked_mut(offset as usize) = value;
     }
     
     /// Retrieves the length of the free memory.
