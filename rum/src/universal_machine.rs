@@ -44,29 +44,6 @@ impl UniversalMachine {
         self.program_counter = value;
     }
 
-    /// Retrieves the value of the register at the specified index.
-    ///
-    /// # Arguments
-    ///
-    /// * `index` - The index of the register to retrieve.
-    ///
-    /// # Returns
-    ///
-    /// The value of the register.
-    pub unsafe fn get_register(&self, index: usize) -> u32 {
-        self.registers[index]
-    }
-
-    /// Sets the value of the register at the specified index.
-    ///
-    /// # Arguments
-    ///
-    /// * `index` - The index of the register to set.
-    /// * `value` - The value to set the register to.
-    pub unsafe fn set_register(&mut self, index: usize, value: u32) {
-        self.registers[index] = value;
-    }
-
         /// Retrieves the segment from the memory space at the specified address.
     ///
     /// # Arguments
